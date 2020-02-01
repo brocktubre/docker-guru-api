@@ -1,0 +1,15 @@
+[
+    {"name": "Ryan Kroonenburg",
+    "favorite_course": "Certified Solution Architech Associate",
+    "__v": 0},
+    {
+      "name": "Brock Tubre",
+      "favorite_course": "Certified Advanced Networking Speciaitly",
+      "__v": 0
+    },
+    {
+        "name": "Steven Moran",
+        "favorite_course": "Certified Advanced Networking Speciaitly",
+        "__v": 0
+    }
+  ]
