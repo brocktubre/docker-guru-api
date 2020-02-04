@@ -1,3 +1,10 @@
+Parameters:
+  NameOfService:
+    Description: The tag name associated with this EC2 instances.
+    Type: String
+  KeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access into public server
+    Type: AWS::EC2::KeyPair::KeyName
 Mappings:
   RegionMap:
     us-east-1:
@@ -9,7 +16,7 @@ Mappings:
     us-west-2:
       AMI: ami-01e24be29428c15b2
 Resources:
-  LnGuruAPIResource:
+  LnGuruAPIEC2Server1:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.micro
@@ -20,6 +27,10 @@ Resources:
         - AMI
       SecurityGroups:
         - !Ref LnInstanceSecurityGroup
+      KeyName: !Ref KeyName
+      Tags:
+        - Key: Name
+          Value: !Join [ '-', [ !Ref NameOfService, 'api', 'instance'] ]
       UserData:
         Fn::Base64:
           !Join [ "", [
@@ -27,7 +38,94 @@ Resources:
             "yum update -y\n",
             "sudo /opt/aws/bin/cfn-init -v ", #use cfn-init to install packages in cloudformation init
             !Sub "--stack ${AWS::StackName} ",
-            "--resource LnGuruAPIResource ",
+            "--resource LnGuruAPIEC2Server1 ",
+            "--configsets InstallAndConfigure ",
+            !Sub "--region ${AWS::Region}",
+            "\n"] ]
+    Metadata:
+      AWS::CloudFormation::Init:
+        configSets: 
+          InstallAndConfigure:
+            - "intall_git"
+            - "intall_docker"
+            - "start_docker"
+            - "change_user_permissions_1"
+            - "change_user_permissions_2"
+            - "chkconfig_docker"  
+            - "download_docker_compose"
+            - "move_docker_compose"
+            - "change_permissions"
+            - "download_git_repo"
+            - "run_docker_compose"
+        intall_git:
+          commands:
+            test:
+              command: yum install git -y
+        intall_docker:
+          commands:
+            test:
+              command: yum install docker -y
+        start_docker:
+          commands:
+            test:
+              command: service docker start
+        change_user_permissions_1:
+          commands:
+            test:
+              command: chown $USER:docker /var/run/docker.sock
+        change_user_permissions_2:
+          commands:
+            test:
+              command: usermod -a -G docker ec2-user
+        chkconfig_docker:
+          commands:
+            test:
+              command: chkconfig docker on
+        download_docker_compose:
+          commands:
+            test:
+              command: curl -L https://github.com/docker/compose/releases/download/1.22.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+        move_docker_compose:
+          commands:
+            test:
+              command: mv /usr/local/bin/docker-compose /usr/bin/docker-compose
+        change_permissions:
+          commands:
+            test:
+              command: chmod +x /usr/bin/docker-compose
+        download_git_repo:
+          commands:
+            test:
+              command: git clone https://github.com/brocktubre/docker-guru-api
+              cwd: /home/ec2-user
+        run_docker_compose:
+          commands:
+            test:
+              command: docker-compose up --build
+              cwd: /home/ec2-user/docker-guru-api
+  LnGuruAPIEC2Server2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId:
+        Fn::FindInMap:
+        - RegionMap
+        - !Ref AWS::Region
+        - AMI
+      SecurityGroups:
+        - !Ref LnInstanceSecurityGroup
+      KeyName: !Ref KeyName
+      Tags:
+        - Key: Name
+          Value: !Join [ '-', [ !Ref NameOfService, 'api', 'instance'] ]
+      UserData:
+        Fn::Base64:
+          !Join [ "", [
+            "#!/bin/bash -xe\n",
+            "yum update -y\n",
+            "sudo /opt/aws/bin/cfn-init -v ", #use cfn-init to install packages in cloudformation init
+            !Sub "--stack ${AWS::StackName} ",
+            "--resource LnGuruAPIEC2Server2 ",
             "--configsets InstallAndConfigure ",
             !Sub "--region ${AWS::Region}",
             "\n"] ]
@@ -102,8 +200,14 @@ Resources:
         FromPort: 3000
         ToPort: 3000
         CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
 Outputs:
-  APILink:
-    Description: The Public link to the API
-    Value: !Sub 'http://${LnGuruAPIResource.PublicIp}:3000/gurus'
-
+  APILink1:
+    Description: Public link to the API via server 1
+    Value: !Sub 'http://${LnGuruAPIEC2Server1.PublicIp}:3000/gurus'
+  APILink2:
+    Description: Public link to the API via server 2
+    Value: !Sub 'http://${LnGuruAPIEC2Server2.PublicIp}:3000/gurus'

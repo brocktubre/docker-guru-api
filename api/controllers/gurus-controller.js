@@ -2,7 +2,7 @@
 
 
 var mongoose = require('mongoose'),
-  Gurus = mongoose.model('Gurus');
+Gurus = mongoose.model('Gurus');
 
 exports.list_all_gurus = function(req, res) {
   Gurus.find({}, function(err, guru) {
@@ -11,9 +11,6 @@ exports.list_all_gurus = function(req, res) {
     res.json(guru);
   });
 };
-
-
-
 
 exports.add_a_guru = function(req, res) {
   var new_guru = new Gurus(req.body);

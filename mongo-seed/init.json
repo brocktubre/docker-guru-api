@@ -1,15 +1,1 @@
-[
-    {"name": "Ryan Kroonenburg",
-    "favorite_course": "Certified Solution Architech Associate",
-    "__v": 0},
-    {
-      "name": "Brock Tubre",
-      "favorite_course": "Certified Advanced Networking Speciaitly",
-      "__v": 0
-    },
-    {
-        "name": "Steven Moran",
-        "favorite_course": "Certified Advanced Networking Speciaitly",
-        "__v": 0
-    }
-  ]
+[{"_id":"5e39c9e25cc71a7bc2531a5e","name":"Ryan Kroonenburg","favorite_course":"Certified Solution Architech Associate","__v":0,"Created_date":"2020-02-04T20:17:10.632Z"},{"_id":"5e39c9e25cc71a7bc2531a5f","name":"Brock Tubre","favorite_course":"Certified Advanced Networking Speciaitly","__v":0,"Created_date":"2020-02-04T20:17:10.632Z"},{"_id":"5e39c9e25cc71a7bc2531a60","name":"Steven Moran","favorite_course":"Certified Advanced Networking Speciaitly","__v":0,"Created_date":"2020-02-04T20:17:10.632Z"}]
